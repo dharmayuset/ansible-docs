@@ -1,0 +1,52 @@
+---
+- name: add row grafana dashboard 
+  hosts: localhost
+  gather_facts: no
+  tasks:
+  ##Download json dashboard
+    - name: Download Grafana dashboard
+      grafana_dashboard:
+        grafana_url: {{url}}
+        grafana_api_key: {{key}}
+        uid: {{uid}}
+        state: export
+        path: {{path}}
+  ###convert json raw to pretty json
+    - name: convert to pretty json
+      shell: python3 -m json.tool {{path}} > {{path_1}}
+    ###replace var
+    - name: copy file for editing 
+      shell: 'cp {{path}} {{path_1}}'
+    - name: replace method to change string in file name service name in query
+      replace:
+       path: {{path}}
+       regexp: 'code_service'
+       replace: "{{ new_service }}"
+    - name: replace method to change string in file name in tittle and row
+      replace:
+        path: {{path}}
+        regexp: 'code_alb'
+        replace: "{{ alb }}"
+    - name: replace method to change string in file name in data source
+      replace:
+        path: {{path}}
+        regexp: 'code_id_datasource'
+        replace: "{{ datasource }}"
+    - name: replace method to change string in file name in Template name
+      replace:
+        path: {{path}}
+        regexp: 'code_tg'
+        replace: "{{ targetgroup }}"   
+    #SED append data spesific line
+    - name: Create file for import to grafana
+      shell: sed '52r {{path}}' {{path_1}} > {{path}}
+    #import dashboard
+    - name: Import Grafana dashboard
+      grafana_dashboard:
+        grafana_url: {{url}}
+        grafana_api_key: {{key}}
+        state: present
+        overwrite: yes
+        folder: {{folder}}
+        path: {{path}}
+
