@@ -1,0 +1,57 @@
+---
+- name: add panel grafana dashboard 
+  hosts: localhost
+  gather_facts: no
+  tasks:
+  ##Download json dashboard
+    - name: Download Grafana dashboard
+      grafana_dashboard:
+        grafana_url: {{URL}}
+        grafana_api_key: {{api_key}}
+        uid: {{uid_grafana}}
+        state: export
+        path: {{path}}
+  ###convert json raw to pretty json
+    - name: convert to pretty json
+      shell: python3 -m json.tool {{path}} > {{path_1}} #convert into pretty json
+    ###replace var
+    - name: copy file for editing 
+      shell: 'cp {{path}} {{path_1}}'
+    - name: replace method to change string in file name job name in query
+      replace:
+       path: {{path}}
+       regexp: 'code_job'
+       replace: "{{ job }}"
+    - name: replace method to change string in file name in tittle and row
+      replace:
+        path: {{path}}
+        regexp: 'code_tittle'
+        replace: "{{ tittle }}"
+    - name: replace method to change string in file name job 2
+      replace:
+       path: {{path}}
+       regexp: 'code_boj'
+       replace: "{{ boj }}"
+    - name: replace method to change string in file name in title 2
+      replace:
+        path: {{path}}
+        regexp: 'code_judul'
+        replace: "{{ judul }}"
+    - name: replace method to change string in file name in id panel
+      replace:
+        path: {{path}}
+        regexp: "code_id_panel"
+        replace: "{{ 230 | random }}"
+    #SED append data spesific line
+    - name: Create file for import to grafana
+      shell: sed '142r {{path}}' {{path}} > {{path_1}}
+    #import dashboard
+    - name: Import Grafana dashboard
+      grafana_dashboard:
+        grafana_url: {{url}}
+        grafana_api_key: {{key}}
+        state: present
+        overwrite: yes
+        folder: {{url}}
+        path: {{path}}
+
