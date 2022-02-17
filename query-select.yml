@@ -1,0 +1,52 @@
+---
+- name: query select atau update
+  hosts: localhost
+  gather_facts: no
+  vars_files: 
+    - {{file_vault}}
+  tasks:
+    - name: Select all id query to db 
+      postgresql_query:
+        db: "{{ db }}"
+        login_host: "{{ host }}"
+        login_user: "{{ user }}" 
+        login_password: "{{ password }}"
+        query: {{query_select}} 
+      register: resultselect
+      when: "'select' in job"
+    - name: Select spesific id query to db
+      postgresql_query:
+        db: "{{ db }}"
+        login_host: "{{ host }}"
+        login_user: "{{ user }}"
+        login_password: "{{ password }}"
+        query: {{query_select_id}}
+      register: resultselectspec
+      when: "'selspes' in job"
+    - name: update query to db 
+      postgresql_query:
+        db: "{{ db }}"
+        login_host: "{{ host }}"
+        login_user: "{{ user }}"
+        login_password: "{{ password }}"
+        query: {{query_update}}
+      register: resultupdate 
+      when: "'update' in job"
+    - debug:
+        var: resultselect.query
+      when: "'select' in job"
+    - debug:
+        var: resultselect.query_result
+      when: "'select' in job"
+    - debug:
+        var: resultselectspec.query
+      when: "'selspes' in job"
+    - debug:
+        var: resultselectspec.query_result
+      when: "'selspes' in job"
+    - debug:
+        var: resultupdate.query
+      when: "'update' in job"
+    - debug:
+        var: resultupdate.query_result
+      when: "'update' in job"
