@@ -1,0 +1,14 @@
+---
+- name:  template again and restart docker
+  hosts: all
+  become: yes
+  tasks:
+    - name: template config
+      template:
+        src: templates/promtail-local-config.yaml.j2
+        dest: "/opt/loki-config/promtail-local-config.yaml"   
+    - name: docker run loki
+      shell: docker restart promtail
+      register: docker
+    - debug:
+        var: docker.stdout
