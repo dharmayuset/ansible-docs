@@ -1,0 +1,23 @@
+---
+- name: install docker with run docker promtail
+  hosts: all
+  become: yes
+  tasks:
+  #test
+    - name: Install docker.io
+      apt:
+       name: docker.io
+       state: present
+      ignore_errors: yes
+    - name: Create a directory if it does not exist
+      ansible.builtin.file:
+        path: /opt/loki-config/
+        state: directory
+        mode: '0755'
+    - name: template config
+      template:
+        src: templates/promtail-local-config.yaml.j2
+        dest: "/opt/loki-config/promtail-local-config.yaml"   
+    - name: docker run loki
+      shell: docker run -d --name promtail -v /opt/loki-config/:/mnt/config -v {{folderpathlog}}:{{folderpathlog}} grafana/promtail:2.0.0 -config.file=/mnt/config/promtail-local-config.yaml
+      ignore_errors: yes
