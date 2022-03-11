@@ -3,7 +3,7 @@
   hosts: all
   become: yes
   tasks:
-  #test
+  #test aja
     - name: Install docker.io
       apt:
        name: docker.io
